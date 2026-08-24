@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public void register(RegisterRequestDto requestDto) {
     this.validateAvailableEmail(requestDto.email());
-    UserEntity userEntity = this.createUser(requestDto);
+    UserEntity userEntity = this.buildUser(requestDto);
     this.userRepository.save(userEntity);
   }
 
@@ -57,8 +57,9 @@ public class AuthServiceImpl implements AuthService {
     }
   }
 
-  private UserEntity createUser(RegisterRequestDto requestDto) {
+  private UserEntity buildUser(RegisterRequestDto requestDto) {
     RoleEntity roleEntity = this.roleRepository.findByCode("CUSTOMER").orElseThrow();
+
     UserCreateDto userCreateDto = UserCreateDto.builder()
         .email(requestDto.email().toLowerCase())
         .passwordHash(this.passwordEncoder.encode(requestDto.password()))
@@ -68,6 +69,7 @@ public class AuthServiceImpl implements AuthService {
         .roles(Set.of(roleEntity))
         .createdAt(LocalDateTime.now())
         .build();
+
     return this.userMapper.toEntity(userCreateDto);
   }
 
@@ -94,10 +96,14 @@ public class AuthServiceImpl implements AuthService {
   private TokenResponseDto createToken(UserEntity userEntity) {
     Instant issuedAt = Instant.now();
     Instant expiresAt = issuedAt.plusSeconds(this.tokenTimeToLive);
+
     JwtClaimsSet claims = this.createClaims(userEntity, issuedAt, expiresAt);
+
     JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
     JwtEncoderParameters parameters = JwtEncoderParameters.from(header, claims);
+
     String accessToken = this.jwtEncoder.encode(parameters).getTokenValue();
+
     return TokenResponseDto.builder()
         .accessToken(accessToken)
         .tokenType("Bearer")
@@ -110,6 +116,7 @@ public class AuthServiceImpl implements AuthService {
         .map(RoleEntity::getCode)
         .sorted()
         .toList();
+
     return JwtClaimsSet.builder()
         .subject(userEntity.getId().toString())
         .issuedAt(issuedAt)
