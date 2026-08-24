@@ -3,13 +3,17 @@ package com.z4greed.auth.entity;
 import com.z4greed.auth.enums.UserStatusEnum;
 import jakarta.persistence.*;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.*;
 
 @Entity
 @Table(name = "users")
 @Getter
+@Setter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +29,9 @@ public class UserEntity {
   private String lastName;
 
   @Enumerated(EnumType.STRING)
-  private UserStatusEnum status = UserStatusEnum.ACTIVE;
+  private UserStatusEnum status;
 
+  @Builder.Default
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
       name = "user_roles",
@@ -36,19 +41,4 @@ public class UserEntity {
 
   private Instant createdAt;
   private Instant updatedAt;
-
-  @Builder
-  public UserEntity(
-      String email, String passwordHash, String firstName, String lastName, RoleEntity roleEntity) {
-    this.email = email;
-    this.passwordHash = passwordHash;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.roles.add(roleEntity);
-    this.createdAt = Instant.now();
-  }
-
-  public Set<RoleEntity> getRoles() {
-    return Collections.unmodifiableSet(this.roles);
-  }
 }
