@@ -8,6 +8,7 @@ import com.z4greed.auth.mapper.UserMapper;
 import com.z4greed.auth.repository.*;
 import com.z4greed.auth.service.AuthService;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +26,7 @@ public class AuthServiceImpl implements AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtEncoder jwtEncoder;
   private final UserMapper userMapper;
-  private final long tokenTimeToLive;
+  private final Long tokenTimeToLive;
 
   public AuthServiceImpl(
       UserRepository userRepository,
@@ -33,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
       PasswordEncoder passwordEncoder,
       JwtEncoder jwtEncoder,
       UserMapper userMapper,
-      @Value("${app.jwt.ttl}") long tokenTimeToLive) {
+      @Value("${app.jwt.ttl}") Long tokenTimeToLive) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
     this.passwordEncoder = passwordEncoder;
@@ -50,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private void validateAvailableEmail(String email) {
-    boolean emailAlreadyRegistered = this.userRepository.findByEmailIgnoreCase(email).isPresent();
+    Boolean emailAlreadyRegistered = this.userRepository.findByEmailIgnoreCase(email).isPresent();
     if (emailAlreadyRegistered) {
       throw new GreedException(ErrorCodeEnum.EMAIL_ALREADY_REGISTERED);
     }
@@ -65,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
         .lastName(requestDto.lastName())
         .status(UserStatusEnum.ACTIVE)
         .roles(Set.of(roleEntity))
-        .createdAt(Instant.now())
+        .createdAt(LocalDateTime.now())
         .build();
     return this.userMapper.toEntity(userCreateDto);
   }
@@ -83,8 +84,8 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private void validateCredentials(UserEntity userEntity, String password) {
-    boolean invalidStatus = userEntity.getStatus() != UserStatusEnum.ACTIVE;
-    boolean invalidPassword = !this.passwordEncoder.matches(password, userEntity.getPasswordHash());
+    Boolean invalidStatus = userEntity.getStatus() != UserStatusEnum.ACTIVE;
+    Boolean invalidPassword = !this.passwordEncoder.matches(password, userEntity.getPasswordHash());
     if (invalidStatus || invalidPassword) {
       throw new GreedException(ErrorCodeEnum.INVALID_CREDENTIALS);
     }

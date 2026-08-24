@@ -2,7 +2,7 @@ package com.z4greed.auth.entity;
 
 import com.z4greed.auth.enums.UserStatusEnum;
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.*;
@@ -39,6 +39,6 @@ public class UserEntity {
       inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<RoleEntity> roles = new HashSet<>();
 
-  private Instant createdAt;
-  private Instant updatedAt;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 }

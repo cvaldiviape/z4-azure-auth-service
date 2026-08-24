@@ -2,7 +2,7 @@ package com.z4greed.auth.dto;
 
 import com.z4greed.auth.entity.RoleEntity;
 import com.z4greed.auth.enums.UserStatusEnum;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.Builder;
 
@@ -14,4 +14,4 @@ public record UserCreateDto(
     String lastName,
     UserStatusEnum status,
     Set<RoleEntity> roles,
-    Instant createdAt) {}
+    LocalDateTime createdAt) {}

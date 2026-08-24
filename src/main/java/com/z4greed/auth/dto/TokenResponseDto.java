@@ -6,4 +6,4 @@ import lombok.Builder;
 public record TokenResponseDto(
     String accessToken,
     String tokenType,
-    long expiresIn) {}
+    Long expiresIn) {}
