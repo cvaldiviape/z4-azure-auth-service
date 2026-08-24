@@ -1,0 +1,4 @@
+spring.datasource:
+  url: jdbc:postgresql://localhost:5433/auth_db
+  username: ecommerce
+  password: ecommerce
