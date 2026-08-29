@@ -32,10 +32,10 @@ JWT_SECRET
 
 ## Ejecutar y depurar
 
-Inicia `auth-db` desde la raíz del proyecto y ejecuta `AuthServiceApplication` con **Debug** en IntelliJ.
+Inicia `auth-postgres` desde la raíz del proyecto y ejecuta `AuthServiceApplication` con **Debug** en IntelliJ.
 
 ```bash
-docker compose -f infra/docker-compose.yml up -d auth-db
+docker compose -f infra/docker-compose.yml up -d auth-postgres
 ```
 
 Para compilar sin ejecutar pruebas:
