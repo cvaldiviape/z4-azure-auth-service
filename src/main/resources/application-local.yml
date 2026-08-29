@@ -1,4 +1,5 @@
-spring.datasource:
-  url: jdbc:postgresql://localhost:5433/auth_db
-  username: ecommerce
-  password: ecommerce
+spring:
+  datasource:
+    url: ${AUTH_DB_URL:jdbc:postgresql://localhost:5433/auth_db}
+    username: ${AUTH_DB_USERNAME:postgres}
+    password: ${AUTH_DB_PASSWORD:saksah}

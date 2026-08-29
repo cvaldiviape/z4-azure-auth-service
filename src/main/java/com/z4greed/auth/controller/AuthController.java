@@ -4,7 +4,7 @@ import com.z4greed.auth.dto.LoginRequestDto;
 import com.z4greed.auth.dto.RegisterRequestDto;
 import com.z4greed.auth.dto.ResponseDto;
 import com.z4greed.auth.dto.TokenResponseDto;
-import com.z4greed.auth.service.AuthService;
+import com.z4greed.auth.service.auth.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
