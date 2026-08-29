@@ -13,6 +13,8 @@ Servicio responsable del registro de usuarios, autenticación y generación de J
 
 `application.yml` contiene la configuración común y activa `local` como perfil predeterminado. `application-local.yml` agrega la conexión a la base Docker.
 
+Flyway crea y modifica el esquema mediante `db/migration`. Hibernate utiliza `ddl-auto: validate` únicamente para comprobar que las entidades coincidan con las tablas; no crea ni altera la estructura.
+
 La expresión:
 
 ```yaml
