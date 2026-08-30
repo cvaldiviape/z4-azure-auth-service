@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCodeEnum {
+  VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Request validation failed"),
   EMAIL_ALREADY_REGISTERED(HttpStatus.CONFLICT, "Email already registered"),
   INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid credentials");
 

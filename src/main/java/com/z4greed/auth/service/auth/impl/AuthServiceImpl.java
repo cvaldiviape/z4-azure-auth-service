@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private void validateAvailableEmail(String email) {
-    Boolean emailAlreadyRegistered = this.userRepository.findByEmailIgnoreCase(email).isPresent();
+    boolean emailAlreadyRegistered = this.userRepository.findByEmailIgnoreCase(email).isPresent();
     if (emailAlreadyRegistered) {
       throw new GreedException(ErrorCodeEnum.EMAIL_ALREADY_REGISTERED);
     }

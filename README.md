@@ -45,3 +45,18 @@ Para compilar sin ejecutar pruebas:
 ```bash
 ./mvnw clean package -DskipTests
 ```
+
+## Errores de validación
+
+Spring Validation conserva las anotaciones declaradas en los DTO. `GlobalExceptionHandler` transforma sus errores al contrato común de la API:
+
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "statusCode": 400,
+  "message": "Request validation failed",
+  "data": {
+    "password": "Password must contain at least 8 characters"
+  }
+}
+```

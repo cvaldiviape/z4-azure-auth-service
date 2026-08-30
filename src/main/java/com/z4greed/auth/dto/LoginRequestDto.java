@@ -5,5 +5,5 @@ import lombok.Builder;
 
 @Builder
 public record LoginRequestDto(
-    @Email @NotBlank String email,
-    @NotBlank String password) {}
+    @Email(message = "Email format is invalid") @NotBlank(message = "Email is required") String email,
+    @NotBlank(message = "Password is required") String password) {}
