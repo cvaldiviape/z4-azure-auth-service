@@ -4,7 +4,6 @@ import com.z4greed.auth.dto.*;
 import com.z4greed.auth.entity.*;
 import com.z4greed.auth.enums.*;
 import com.z4greed.auth.exception.GreedException;
-import com.z4greed.auth.mapper.UserMapper;
 import com.z4greed.auth.repository.*;
 import com.z4greed.auth.service.auth.AuthService;
 import java.time.Instant;
@@ -25,7 +24,6 @@ public class AuthServiceImpl implements AuthService {
   private final RoleRepository roleRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtEncoder jwtEncoder;
-  private final UserMapper userMapper;
   private final Long tokenTimeToLive;
 
   public AuthServiceImpl(
@@ -33,13 +31,11 @@ public class AuthServiceImpl implements AuthService {
       RoleRepository roleRepository,
       PasswordEncoder passwordEncoder,
       JwtEncoder jwtEncoder,
-      UserMapper userMapper,
       @Value("${app.jwt.ttl}") Long tokenTimeToLive) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtEncoder = jwtEncoder;
-    this.userMapper = userMapper;
     this.tokenTimeToLive = tokenTimeToLive;
   }
 
@@ -60,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
   private UserEntity buildUser(RegisterRequestDto requestDto) {
     RoleEntity roleEntity = this.roleRepository.findByCode("CUSTOMER").orElseThrow();
 
-    UserCreateDto userCreateDto = UserCreateDto.builder()
+    return UserEntity.builder()
         .email(requestDto.email().toLowerCase())
         .passwordHash(this.passwordEncoder.encode(requestDto.password()))
         .firstName(requestDto.firstName())
@@ -69,8 +65,6 @@ public class AuthServiceImpl implements AuthService {
         .roles(Set.of(roleEntity))
         .createdAt(LocalDateTime.now())
         .build();
-
-    return this.userMapper.toEntity(userCreateDto);
   }
 
   @Override
