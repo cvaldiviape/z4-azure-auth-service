@@ -1,4 +1,4 @@
-package com.z4greed.auth.service.auth;
+package com.z4greed.auth.service;
 
 import com.z4greed.auth.dto.LoginRequestDto;
 import com.z4greed.auth.dto.RegisterRequestDto;

@@ -1,11 +1,11 @@
-package com.z4greed.auth.service.auth.impl;
+package com.z4greed.auth.service.impl;
 
 import com.z4greed.auth.dto.*;
 import com.z4greed.auth.entity.*;
 import com.z4greed.auth.enums.*;
 import com.z4greed.auth.exception.GreedException;
 import com.z4greed.auth.repository.*;
-import com.z4greed.auth.service.auth.AuthService;
+import com.z4greed.auth.service.AuthService;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
