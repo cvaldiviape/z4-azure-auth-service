@@ -16,33 +16,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-  private final AuthService authService;
+    private final AuthService authService;
 
-  public AuthController(
-      AuthService authService) {
-    this.authService = authService;
-  }
+    public AuthController(
+            AuthService authService) {
+        this.authService = authService;
+    }
 
-  @PostMapping("/register")
-  @ResponseStatus(HttpStatus.CREATED)
-  public ResponseDto<Void> register(@Valid @RequestBody RegisterRequestDto requestDto) {
-    this.authService.register(requestDto);
-    return ResponseDto.<Void>builder()
-        .code("USER_REGISTERED")
-        .statusCode(HttpStatus.CREATED.value())
-        .message("User registered successfully")
-        .build();
-  }
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseDto<Void> register(@Valid @RequestBody RegisterRequestDto requestDto) {
+        this.authService.register(requestDto);
+        return ResponseDto.<Void>builder()
+                .code("USER_REGISTERED")
+                .statusCode(HttpStatus.CREATED.value())
+                .message("User registered successfully")
+                .build();
+    }
 
-  @PostMapping("/login")
-  public ResponseDto<TokenResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto) {
-    TokenResponseDto tokenResponseDto = this.authService.login(requestDto);
-    return ResponseDto.<TokenResponseDto>builder()
-        .code("LOGIN_SUCCESS")
-        .statusCode(HttpStatus.OK.value())
-        .message("Login successful")
-        .data(tokenResponseDto)
-        .build();
-  }
+    @PostMapping("/login")
+    public ResponseDto<TokenResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto) {
+        TokenResponseDto tokenResponseDto = this.authService.login(requestDto);
+        return ResponseDto.<TokenResponseDto>builder()
+                .code("LOGIN_SUCCESS")
+                .statusCode(HttpStatus.OK.value())
+                .message("Login successful")
+                .data(tokenResponseDto)
+                .build();
+    }
 
 }
