@@ -12,6 +12,8 @@ spring:
       ddl-auto: validate
 
 app:
+  security: # Reglas de acceso que aplica z4-shared-security.
+    public-paths: /auth/**, /actuator/health # Sin token.
   jwt:
     secret: ${JWT_SECRET:change-me-change-me-change-me-32-bytes}
     ttl: 3600

@@ -3,7 +3,7 @@ package com.z4greed.auth.service.impl;
 import com.z4greed.auth.dto.*;
 import com.z4greed.auth.entity.*;
 import com.z4greed.auth.enums.*;
-import com.z4greed.auth.exception.GreedException;
+import com.z4greed.shared.core.exception.BusinessException;
 import com.z4greed.auth.repository.*;
 import com.z4greed.auth.service.AuthService;
 import java.time.Instant;
@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
     private void validateAvailableEmail(String email) {
         boolean emailAlreadyRegistered = this.userRepository.findByEmailIgnoreCase(email).isPresent();
         if (emailAlreadyRegistered) {
-            throw new GreedException(ErrorCodeEnum.EMAIL_ALREADY_REGISTERED);
+            throw new BusinessException(ErrorCodeEnum.EMAIL_ALREADY_REGISTERED);
         }
     }
 
@@ -76,14 +76,14 @@ public class AuthServiceImpl implements AuthService {
 
     private UserEntity findUser(String email) {
         return this.userRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new GreedException(ErrorCodeEnum.INVALID_CREDENTIALS));
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.INVALID_CREDENTIALS));
     }
 
     private void validateCredentials(UserEntity userEntity, String password) {
         Boolean invalidStatus = userEntity.getStatus() != UserStatusEnum.ACTIVE;
         Boolean invalidPassword = !this.passwordEncoder.matches(password, userEntity.getPasswordHash());
         if (invalidStatus || invalidPassword) {
-            throw new GreedException(ErrorCodeEnum.INVALID_CREDENTIALS);
+            throw new BusinessException(ErrorCodeEnum.INVALID_CREDENTIALS);
         }
     }
 

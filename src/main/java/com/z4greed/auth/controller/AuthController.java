@@ -2,7 +2,7 @@ package com.z4greed.auth.controller;
 
 import com.z4greed.auth.dto.LoginRequestDto;
 import com.z4greed.auth.dto.RegisterRequestDto;
-import com.z4greed.auth.dto.ResponseDto;
+import com.z4greed.shared.core.dto.ResponseDto;
 import com.z4greed.auth.dto.TokenResponseDto;
 import com.z4greed.auth.service.AuthService;
 import jakarta.validation.Valid;

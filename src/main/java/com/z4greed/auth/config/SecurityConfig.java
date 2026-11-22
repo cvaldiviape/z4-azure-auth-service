@@ -1,16 +1,17 @@
 package com.z4greed.auth.config;
 
+import java.nio.charset.StandardCharsets;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.*;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
+// Solo lo propio de auth-service: cifrar contraseñas y firmar tokens.
+// Validar tokens, rutas públicas y CORS lo configura z4-shared-security (ver app.security en application.yml).
 @Configuration
 public class SecurityConfig {
 
@@ -21,27 +22,7 @@ public class SecurityConfig {
 
     @Bean
     JwtEncoder jwtEncoder(@Value("${app.jwt.secret}") String secret) {
-        return NimbusJwtEncoder.withSecretKey(new SecretKeySpec(secret.getBytes(), "HmacSHA256"))
-                .build();
-    }
-
-    @Bean
-    JwtDecoder jwtDecoder(@Value("${app.jwt.secret}") String secret) {
-        return NimbusJwtDecoder.withSecretKey(new SecretKeySpec(secret.getBytes(), "HmacSHA256"))
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
-    }
-
-    @Bean
-    SecurityFilterChain security(HttpSecurity h) throws Exception {
-        return h.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        a ->
-                                a.requestMatchers("/auth/**", "/actuator/health")
-                                        .permitAll()
-                                        .anyRequest()
-                                        .authenticated())
-                .oauth2ResourceServer(o -> o.jwt(j -> {}))
+        return NimbusJwtEncoder.withSecretKey(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"))
                 .build();
     }
 
