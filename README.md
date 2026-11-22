@@ -4,12 +4,12 @@ Servicio responsable del registro de usuarios, autenticación y generación de J
 
 ## Configuración local
 
-| Propiedad | Valor predeterminado |
-|---|---|
-| Puerto HTTP | `8081` |
-| PostgreSQL | `localhost:5433/auth_db` |
-| Usuario | `ecommerce` |
-| Contraseña | `ecommerce` |
+| #   | Propiedad   | Valor predeterminado     |
+|-----|-------------|--------------------------|
+| 1   | Puerto HTTP | `8081`                   |
+| 2   | PostgreSQL  | `localhost:5433/auth_db` |
+| 3   | Usuario     | `ecommerce`              |
+| 4   | Contraseña  | `ecommerce`              |
 
 `application.yml` contiene la configuración común y activa `local` como perfil predeterminado. `application-local.yml` agrega la conexión a la base Docker.
 
