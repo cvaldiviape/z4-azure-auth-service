@@ -41,9 +41,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void register(RegisterRequestDto requestDto) {
-        this.validateAvailableEmail(requestDto.email());
-        UserEntity userEntity = this.buildUser(requestDto);
-        this.userRepository.save(userEntity);
+        String email = requestDto.email();
+
+        this.validateAvailableEmail(email);
+        this.createUser(requestDto);
     }
 
     private void validateAvailableEmail(String email) {
@@ -53,18 +54,22 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private UserEntity buildUser(RegisterRequestDto requestDto) {
+    private void createUser(RegisterRequestDto requestDto) {
         RoleEntity roleEntity = this.roleRepository.findByCode("CUSTOMER").orElseThrow();
+        String email = requestDto.email().toLowerCase();
+        String passwordHash = this.passwordEncoder.encode(requestDto.password());
 
-        return UserEntity.builder()
-                .email(requestDto.email().toLowerCase())
-                .passwordHash(this.passwordEncoder.encode(requestDto.password()))
+        UserEntity userEntity = UserEntity.builder()
+                .email(email)
+                .passwordHash(passwordHash)
                 .firstName(requestDto.firstName())
                 .lastName(requestDto.lastName())
                 .status(UserStatusEnum.ACTIVE)
                 .roles(Set.of(roleEntity))
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        this.userRepository.save(userEntity);
     }
 
     @Override
