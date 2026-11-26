@@ -3,7 +3,7 @@ package com.z4greed.auth.service.impl;
 import com.z4greed.auth.dto.*;
 import com.z4greed.auth.entity.*;
 import com.z4greed.auth.enums.*;
-import com.z4greed.auth.exception.GreedException;
+import com.z4greed.shared.core.exception.BusinessException;
 import com.z4greed.auth.repository.*;
 import com.z4greed.auth.service.AuthService;
 import java.time.Instant;
@@ -20,104 +20,109 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class AuthServiceImpl implements AuthService {
-  private final UserRepository userRepository;
-  private final RoleRepository roleRepository;
-  private final PasswordEncoder passwordEncoder;
-  private final JwtEncoder jwtEncoder;
-  private final Long tokenTimeToLive;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtEncoder jwtEncoder;
+    private final Long tokenTimeToLive;
 
-  public AuthServiceImpl(
-      UserRepository userRepository,
-      RoleRepository roleRepository,
-      PasswordEncoder passwordEncoder,
-      JwtEncoder jwtEncoder,
-      @Value("${app.jwt.ttl}") Long tokenTimeToLive) {
-    this.userRepository = userRepository;
-    this.roleRepository = roleRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.jwtEncoder = jwtEncoder;
-    this.tokenTimeToLive = tokenTimeToLive;
-  }
-
-  @Override
-  public void register(RegisterRequestDto requestDto) {
-    this.validateAvailableEmail(requestDto.email());
-    UserEntity userEntity = this.buildUser(requestDto);
-    this.userRepository.save(userEntity);
-  }
-
-  private void validateAvailableEmail(String email) {
-    boolean emailAlreadyRegistered = this.userRepository.findByEmailIgnoreCase(email).isPresent();
-    if (emailAlreadyRegistered) {
-      throw new GreedException(ErrorCodeEnum.EMAIL_ALREADY_REGISTERED);
+    public AuthServiceImpl(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+            JwtEncoder jwtEncoder,
+            @Value("${app.jwt.ttl}") Long tokenTimeToLive) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtEncoder = jwtEncoder;
+        this.tokenTimeToLive = tokenTimeToLive;
     }
-  }
 
-  private UserEntity buildUser(RegisterRequestDto requestDto) {
-    RoleEntity roleEntity = this.roleRepository.findByCode("CUSTOMER").orElseThrow();
+    @Override
+    public void register(RegisterRequestDto requestDto) {
+        String email = requestDto.email();
 
-    return UserEntity.builder()
-        .email(requestDto.email().toLowerCase())
-        .passwordHash(this.passwordEncoder.encode(requestDto.password()))
-        .firstName(requestDto.firstName())
-        .lastName(requestDto.lastName())
-        .status(UserStatusEnum.ACTIVE)
-        .roles(Set.of(roleEntity))
-        .createdAt(LocalDateTime.now())
-        .build();
-  }
-
-  @Override
-  public TokenResponseDto login(LoginRequestDto requestDto) {
-    UserEntity userEntity = this.findUser(requestDto.email());
-    this.validateCredentials(userEntity, requestDto.password());
-    return this.createToken(userEntity);
-  }
-
-  private UserEntity findUser(String email) {
-    return this.userRepository.findByEmailIgnoreCase(email)
-        .orElseThrow(() -> new GreedException(ErrorCodeEnum.INVALID_CREDENTIALS));
-  }
-
-  private void validateCredentials(UserEntity userEntity, String password) {
-    Boolean invalidStatus = userEntity.getStatus() != UserStatusEnum.ACTIVE;
-    Boolean invalidPassword = !this.passwordEncoder.matches(password, userEntity.getPasswordHash());
-    if (invalidStatus || invalidPassword) {
-      throw new GreedException(ErrorCodeEnum.INVALID_CREDENTIALS);
+        this.validateAvailableEmail(email);
+        this.createUser(requestDto);
     }
-  }
 
-  private TokenResponseDto createToken(UserEntity userEntity) {
-    Instant issuedAt = Instant.now();
-    Instant expiresAt = issuedAt.plusSeconds(this.tokenTimeToLive);
+    private void validateAvailableEmail(String email) {
+        boolean emailAlreadyRegistered = this.userRepository.findByEmailIgnoreCase(email).isPresent();
+        if (emailAlreadyRegistered) {
+            throw new BusinessException(ErrorCodeEnum.EMAIL_ALREADY_REGISTERED);
+        }
+    }
 
-    JwtClaimsSet claims = this.createClaims(userEntity, issuedAt, expiresAt);
+    private void createUser(RegisterRequestDto requestDto) {
+        RoleEntity roleEntity = this.roleRepository.findByCode("CUSTOMER").orElseThrow();
+        String email = requestDto.email().toLowerCase();
+        String passwordHash = this.passwordEncoder.encode(requestDto.password());
 
-    JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
-    JwtEncoderParameters parameters = JwtEncoderParameters.from(header, claims);
+        UserEntity userEntity = UserEntity.builder()
+                .email(email)
+                .passwordHash(passwordHash)
+                .firstName(requestDto.firstName())
+                .lastName(requestDto.lastName())
+                .status(UserStatusEnum.ACTIVE)
+                .roles(Set.of(roleEntity))
+                .createdAt(LocalDateTime.now())
+                .build();
 
-    String accessToken = this.jwtEncoder.encode(parameters).getTokenValue();
+        this.userRepository.save(userEntity);
+    }
 
-    return TokenResponseDto.builder()
-        .accessToken(accessToken)
-        .tokenType("Bearer")
-        .expiresIn(this.tokenTimeToLive)
-        .build();
-  }
+    @Override
+    public TokenResponseDto login(LoginRequestDto requestDto) {
+        UserEntity userEntity = this.findUser(requestDto.email());
+        this.validateCredentials(userEntity, requestDto.password());
+        return this.createToken(userEntity);
+    }
 
-  private JwtClaimsSet createClaims(UserEntity userEntity, Instant issuedAt, Instant expiresAt) {
-    List<String> listRoleCodes = userEntity.getRoles().stream()
-        .map(RoleEntity::getCode)
-        .sorted()
-        .toList();
+    private UserEntity findUser(String email) {
+        return this.userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new BusinessException(ErrorCodeEnum.INVALID_CREDENTIALS));
+    }
 
-    return JwtClaimsSet.builder()
-        .subject(userEntity.getId().toString())
-        .issuedAt(issuedAt)
-        .expiresAt(expiresAt)
-        .claim("email", userEntity.getEmail())
-        .claim("roles", listRoleCodes)
-        .build();
-  }
+    private void validateCredentials(UserEntity userEntity, String password) {
+        Boolean invalidStatus = userEntity.getStatus() != UserStatusEnum.ACTIVE;
+        Boolean invalidPassword = !this.passwordEncoder.matches(password, userEntity.getPasswordHash());
+        if (invalidStatus || invalidPassword) {
+            throw new BusinessException(ErrorCodeEnum.INVALID_CREDENTIALS);
+        }
+    }
+
+    private TokenResponseDto createToken(UserEntity userEntity) {
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plusSeconds(this.tokenTimeToLive);
+
+        JwtClaimsSet claims = this.createClaims(userEntity, issuedAt, expiresAt);
+
+        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
+        JwtEncoderParameters parameters = JwtEncoderParameters.from(header, claims);
+
+        String accessToken = this.jwtEncoder.encode(parameters).getTokenValue();
+
+        return TokenResponseDto.builder()
+                .accessToken(accessToken)
+                .tokenType("Bearer")
+                .expiresIn(this.tokenTimeToLive)
+                .build();
+    }
+
+    private JwtClaimsSet createClaims(UserEntity userEntity, Instant issuedAt, Instant expiresAt) {
+        List<String> listRoleCodes = userEntity.getRoles().stream()
+                .map(RoleEntity::getCode)
+                .sorted()
+                .toList();
+
+        return JwtClaimsSet.builder()
+                .subject(userEntity.getId().toString())
+                .issuedAt(issuedAt)
+                .expiresAt(expiresAt)
+                .claim("email", userEntity.getEmail())
+                .claim("roles", listRoleCodes)
+                .build();
+    }
 
 }
