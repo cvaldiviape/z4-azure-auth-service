@@ -14,6 +14,7 @@ spring:
 app:
   security: # Reglas de acceso que aplica z4-shared-security.
     public-paths: /auth/**, /actuator/health # Sin token.
+    cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:5173} # Orígenes de los fronts en desarrollo.
   jwt:
     secret: ${JWT_SECRET:change-me-change-me-change-me-32-bytes}
     ttl: 3600
